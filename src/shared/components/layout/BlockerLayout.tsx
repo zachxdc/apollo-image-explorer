@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Box, HStack, Button, Text } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { Footer } from "../ui/Footer";
 import { BlockerModal } from "../ui/BlockerModal";
 import { useUserProfile } from "@/contexts/user-profile";
-import { Colors } from "@/shared/constants/colors";
+import { Header } from "../ui/Header";
 
 export const BlockerLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -17,32 +17,15 @@ export const BlockerLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <Box minH="100dvh" display="flex" flexDir="column">
-      <Box as="header" px={4} py={3} borderBottomWidth="1px">
-        <HStack justify="space-between">
-          <Text fontWeight="bold">Apollo Image Explorer</Text>
-          {profile && (
-            <HStack>
-              <Text fontSize="sm" color={Colors.textSecondary}>
-                {profile?.username} | {profile?.jobTitle}{" "}
-              </Text>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setEditOpen(true)}
-              >
-                Edit Info
-              </Button>
-            </HStack>
-          )}
-        </HStack>
-      </Box>
-
+      <Header
+        username={profile?.username}
+        jobTitle={profile?.jobTitle}
+        onEditInfo={() => setEditOpen(true)}
+      />
       <Box as="main" flex="1">
         {children}
       </Box>
-
       <Footer />
-
       {profile && (
         <BlockerModal
           open={editOpen}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { VStack, Input, Button, Text, Dialog } from "@chakra-ui/react";
+import { VStack, Input, Button, Dialog, Field, Box } from "@chakra-ui/react";
 import { Colors } from "@/shared/constants/colors";
 
 type Props = {
@@ -21,17 +21,21 @@ export const BlockerModal: React.FC<Props> = ({
   defaultJobTitle = "",
 }) => {
   const [username, setUsername] = useState(defaultUsername);
-  const [job, setJob] = useState(defaultJobTitle);
+  const [jobTitle, setJobTitle] = useState(defaultJobTitle);
 
   useEffect(() => {
     setUsername(defaultUsername);
-    setJob(defaultJobTitle);
+    setJobTitle(defaultJobTitle);
   }, [defaultUsername, defaultJobTitle]);
 
-  const canSubmit = username.trim() && job.trim();
+  const MAX_USERNAME = 15;
+  const MAX_JOB_TITLE = 50;
+
+  const isEditing = Boolean(defaultUsername || defaultJobTitle);
+  const canSubmit = username.trim().length > 0 && jobTitle.trim().length > 0;
   const submit = () => {
     if (!onSubmit || !canSubmit) return;
-    onSubmit(username, job);
+    onSubmit(username, jobTitle);
     onClose?.();
   };
 
@@ -45,7 +49,6 @@ export const BlockerModal: React.FC<Props> = ({
       <Dialog.Backdrop bg={Colors.overlayBg} />
       <Dialog.Positioner alignItems="center">
         <Dialog.Content
-          bg="white"
           w="full"
           maxW="sm"
           borderRadius="md"
@@ -53,33 +56,43 @@ export const BlockerModal: React.FC<Props> = ({
           p={4}
         >
           <Dialog.Header>
-            <Dialog.Title textAlign="center">
-              {defaultUsername || defaultJobTitle
-                ? "Edit your info"
-                : "Welcome"}
+            <Dialog.Title>
+              {isEditing ? "Edit your info" : "Enter your info to continue"}
             </Dialog.Title>
           </Dialog.Header>
-
           <Dialog.Body>
-            <VStack alignItems="stretch" gap={3}>
-              <Text fontSize="sm" textAlign="center">
-                Enter your username and job title to continue
-              </Text>
-              <Input
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <Input
-                placeholder="Job Title"
-                value={job}
-                onChange={(e) => setJob(e.target.value)}
-              />
+            <VStack alignItems="stretch" gap={4}>
+              <Field.Root>
+                <Field.Label>Username*</Field.Label>
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  maxLength={MAX_USERNAME}
+                />
+                {username.length === MAX_USERNAME && (
+                  <Field.HelperText color={Colors.textSecondary}>
+                    Maximum {MAX_USERNAME} characters reached
+                  </Field.HelperText>
+                )}
+              </Field.Root>
+              <Field.Root>
+                <Field.Label>Job Title*</Field.Label>
+                <Input
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  maxLength={MAX_JOB_TITLE}
+                />
+                {jobTitle.length === MAX_JOB_TITLE && (
+                  <Field.HelperText color={Colors.textSecondary}>
+                    Maximum {MAX_JOB_TITLE} characters reached
+                  </Field.HelperText>
+                )}
+              </Field.Root>
             </VStack>
           </Dialog.Body>
-          <Dialog.Footer gap="2">
+          <Dialog.Footer gap={2}>
             <Button onClick={submit} disabled={!canSubmit} mr={2}>
-              {defaultUsername || defaultJobTitle ? "Save" : "Continue"}
+              {isEditing ? "Save" : "Continue"}
             </Button>
             {onClose && (
               <Button variant="outline" onClick={onClose}>

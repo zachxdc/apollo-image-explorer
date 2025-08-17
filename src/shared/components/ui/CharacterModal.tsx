@@ -6,7 +6,8 @@ import {
   Box,
   VStack,
   Button,
-  IconButton,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import { useQuery, gql } from "@apollo/client";
 import { QUERY_CHARACTER } from "@/graphql/ricky-morty.gql";
@@ -102,11 +103,13 @@ export function CharacterModal({
           <Dialog.Body overflowY="auto">
             {error ? (
               <Text color={Colors.error}>Failed to load details.</Text>
-            ) : !character ? (
-              <Text color={Colors.textSecondary}>Loading…</Text>
+            ) : loading || !character ? (
+              <Center py={10}>
+                <Spinner size="lg" color={Colors.textSecondary} />
+              </Center>
             ) : (
               <VStack gap={4} align="stretch">
-                {isValidValue(character.image) && (
+                {character.image && (
                   <Box textAlign="center">
                     <Image
                       src={character.image!}
@@ -122,7 +125,6 @@ export function CharacterModal({
                   {fields.map(([label, value]) => (
                     <InfoItem key={label} label={label} value={value} />
                   ))}
-
                   {Array.isArray(character.episode) &&
                     character.episode.length > 0 && (
                       <Box>

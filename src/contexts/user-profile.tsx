@@ -10,7 +10,7 @@ type Ctx = {
   reset: () => void;
 };
 
-const KEY = "leonardo-user";
+const KEY = "ricky-morty-user";
 const C = createContext<Ctx | null>(null);
 
 export const UserProfileProvider = ({

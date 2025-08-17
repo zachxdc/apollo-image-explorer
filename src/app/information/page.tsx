@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client";
 import {
@@ -12,6 +12,8 @@ import {
   Button,
   HStack,
   AspectRatio,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import { useRequireProfile } from "@/hooks/use-require-profile";
 import { QUERY_CHARACTERS } from "@/graphql/ricky-morty.gql";
@@ -37,9 +39,9 @@ type CharactersResp = {
 
 const InformationPage = () => {
   const { profile, ready } = useRequireProfile("/blocker");
-
   const search = useSearchParams();
   const router = useRouter();
+
   const pageFromUrl = Number(search.get("page") || "1");
   const page =
     Number.isFinite(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
@@ -57,7 +59,14 @@ const InformationPage = () => {
     }
   }, [data, page, router]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [page]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   if (!ready) return null;
 
@@ -71,45 +80,56 @@ const InformationPage = () => {
           Failed to load: {String(error.message ?? error)}
         </Box>
       )}
-      <SimpleGrid
-        justifyItems="center"
-        columns={{ base: 2, md: 4, lg: 5 }}
-        gap={4}
-        aria-busy={loading ? "true" : "false"}
-      >
-        {(data?.characters?.results ?? []).map((character) => (
-          <Box
-            as="article"
-            key={character.id}
-            w="full"
-            maxW="300px"
-            borderRadius="md"
-            borderWidth="1px"
-            overflow="hidden"
-            _hover={{ boxShadow: "md", cursor: "pointer" }}
-            display="flex"
-            flexDir="column"
-            onClick={() => setActiveId(character.id)}
-          >
-            <AspectRatio ratio={1}>
-              <Image
-                src={character.image}
-                alt={character.name}
-                objectFit="cover"
-              />
-            </AspectRatio>
-            <Box p={4}>
-              <Text fontWeight="bold" title={character.name}>
-                {character.name}
-              </Text>
-              <Text fontSize="sm" color={Colors.textSecondary}>
-                Status: {capitaliseFirstLetter(character.status)}
-              </Text>
+      <Box position="relative" ref={listRef}>
+        {loading && (
+          <Center py={400}>
+            <Spinner size="lg" color={Colors.textSecondary} />
+          </Center>
+        )}
+        <SimpleGrid
+          justifyItems="center"
+          columns={{ base: 2, md: 4, lg: 5 }}
+          gap={4}
+          aria-busy={loading ? "true" : "false"}
+          pointerEvents={loading ? "none" : "auto"}
+        >
+          {(data?.characters?.results ?? []).map((character) => (
+            <Box
+              as="article"
+              key={character.id}
+              w="full"
+              maxW="300px"
+              borderRadius="md"
+              borderWidth="1px"
+              overflow="hidden"
+              _hover={{ boxShadow: "md", cursor: "pointer" }}
+              display="flex"
+              flexDir="column"
+              onClick={() => setActiveId(character.id)}
+            >
+              <AspectRatio ratio={1}>
+                <Image
+                  src={character.image}
+                  alt={character.name}
+                  objectFit="cover"
+                />
+              </AspectRatio>
+              <Box p={4}>
+                <Text fontWeight="bold" title={character.name}>
+                  {character.name}
+                </Text>
+                <Text fontSize="sm" color={Colors.textSecondary}>
+                  Status: {capitaliseFirstLetter(character.status)}
+                </Text>
+                <Text fontSize="sm" color={Colors.textSecondary}>
+                  Species: {capitaliseFirstLetter(character.species)}
+                </Text>
+              </Box>
             </Box>
-          </Box>
-        ))}
-      </SimpleGrid>
-      <HStack justify="center" gap={2} mt={6}>
+          ))}
+        </SimpleGrid>
+      </Box>
+      <HStack justify="center" gap={2} mt={8}>
         <Button
           variant="outline"
           onClick={() =>
@@ -141,7 +161,6 @@ const InformationPage = () => {
           Next
         </Button>
       </HStack>
-
       <CharacterModal
         id={activeId}
         open={!!activeId}
