@@ -1,69 +1,77 @@
 # Apollo Image Explorer (Challenge Brief v3.5)
+Apollo Image Explorer is a web application built with Next.js, Chakra UI, and Apollo Client.
+It allows users to explore characters from the Rick and Morty universe with images, metadata, and episode details in a clean, responsive interface.
+👉 Try it live: [apollo-image-explorer.vercel.app/information](https://apollo-image-explorer.vercel.app/information)
 
-This project was built as part of **Challenge Brief (v3.5) — Web Team** for Leonardo.Ai.  
-It follows the requirements outlined in the challenge and demonstrates a production-quality implementation using **Next.js**, **Chakra UI**, and **Apollo Client**.
+## TL;DR
+Rick & Morty character explorer built with Next.js + Chakra UI + Apollo Client.  
+- 🚪 User must enter profile info (persisted in localStorage).  
+- 📄 Paginated character list with images and data.  
+- 🪟 Character modal shows details + episodes.  
+- 📱 Responsive: iPhone 4/5 usable, iPhone 6+ perfect.  
+- 🚀 Live demo: [apollo-image-explorer.vercel.app/information](https://apollo-image-explorer.vercel.app/information)
 
----
-
-## Challenge Requirements Addressed
-
-1. **Documentation**: Codebase is structured and commented for clarity.
-2. **Next.js App Router + TypeScript**: Implemented using Next.js 15 with App Router and TypeScript.
-3. **Git Setup**: Managed via Git.
+## Features
+1. **Documentation**: Clean, structured codebase, set up with git.
+2. **Next.js App Router + TypeScript**: Built using Next.js 15 with TypeScript.
+3.	**State Persistence**: User profile (username + job title) saved in localStorage and persists across reloads.
 4. **Chakra UI**: UI styled exclusively with Chakra UI v3.
-5. **Responsive UI**: Designed to be responsive across desktop and mobile (tested down to iPhone 5 width).
+5. **Responsive Design**: Optimised for mobile, tablet, and desktop.
+	•	iPhone 5s and earlier: Supported, but layout and styling may not be perfect due to very small screen constraints.
+	•	iPhone 6 and above: Perfect support with full responsiveness.
 6. **Footer**: Displays the challenge version.
 7. **Blocking Flow**:
-   - User must enter **username** and **job title** before accessing data.
+   - Users must enter username and job title before accessing data.
    - Profile data persists in `localStorage`.
-   - Users can **view** and **edit** this information.
+   - Profile information can be viewed and edited at any time.
 8. **Apollo Client + GraphQL**:
    - Uses [Rick and Morty GraphQL API](https://rickandmortyapi.com/graphql).
-   - Displays characters with images and metadata.
-   - Data fetch is blocked until profile is set.
+   - Displays characters' images and data.
+   - Data fetch is blocked until the profile is set.
 9. **Information Page**:
-   - Paginated list of characters.
-   - Direct URL linking supported (e.g., `/information?page=3`).
+   - Characters displayed as a card design in a paginated list.
+   - Supports direct URL linking (e.g., /information?page=3).
 10. **Detail Modal**:
-    - Item click opens a modal with character details and episode list.
+    - Clicking on a character opens a modal with detailed info and episode appearances.
 11. **Deployment**:
-    - Configured for **Vercel free tier**.
+    - Deployed on Vercel free tier 
+    - Live demo: [https://apollo-image-explorer.vercel.app/information](https://apollo-image-explorer.vercel.app/information)
 12. **Minimal Dependencies**:
-    - Built only with core tools required for the challenge.
+    - Built only with the core tools required for the challenge.
 
----
-
-## File Structure
-
+## File Structure:
 src
 ├─ app
-│ ├─ blocker/  
-│ │ └─ page.tsx
-│ ├─ information/  
-│ │ └─ page.tsx
-│ ├─ layout.tsx  
-│ └─ page.tsx  
-├─ contexts
-│ └─ user-profile.tsx  
-├─ graphql
-│ ├─ apollo-client.ts  
-│ └─ ricky-morty.gql.ts  
-├─ hooks
-│ └─ use-require-profile.ts  
-├─ shared
-│ ├─ components
-│ │ ├─ layout/BlockerLayout.tsx
-│ │ └─ ui/
-│ │ ├─ BlockerModal.tsx
-│ │ ├─ CharacterModal.tsx
-│ │ ├─ Footer.tsx
-│ │ ├─ Header.tsx
-│ │ └─ provider.tsx
-│ ├─ constants/colors.ts
-│ └─ utils/formatValue.ts
+│  ├─ blocker/
+│  │  └─ page.tsx
+│  ├─ information/
+│  │  └─ page.tsx
+│  ├─ favicon.ico
+│  ├─ layout.tsx
+│  └─ page.tsx
+├─ contexts/
+│  └─ user-profile.tsx
+├─ graphql/
+│  ├─ apollo-client.ts
+│  └─ ricky-morty.gql.ts
+├─ hooks/
+│  └─ use-require-profile.ts
+├─ shared/
+│  ├─ components/
+│  │  ├─ layout/
+│  │  │  └─ BlockerLayout.tsx
+│  │  └─ ui/
+│  │     ├─ BlockerModal.tsx
+│  │     ├─ CharacterModal.tsx
+│  │     ├─ Footer.tsx
+│  │     ├─ Header.tsx
+│  │     └─ provider.tsx
+│  ├─ constants/
+│  │  └─ colors.ts
+│  └─ utils/
+│     └─ formatValue.ts
 
 ## Scripts
-
 ```bash
 pnpm install     # Install dependencies
 pnpm run dev     # Start dev server on localhost:3000
