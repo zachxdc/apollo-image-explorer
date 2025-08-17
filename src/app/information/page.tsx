@@ -52,6 +52,12 @@ const InformationPage = () => {
     fetchPolicy: "cache-first",
   });
 
+  const totalPagesRef = useRef<number | null>(null);
+  useEffect(() => {
+    const p = data?.characters?.info?.pages;
+    if (typeof p === "number") totalPagesRef.current = p;
+  }, [data]);
+
   useEffect(() => {
     const total = data?.characters?.info?.pages;
     if (total && page > total) {
@@ -146,7 +152,8 @@ const InformationPage = () => {
           Prev
         </Button>
         <Text>
-          Page {page} / {data?.characters?.info?.pages ?? "…"}
+          Page {page}
+          {totalPagesRef.current ? ` / ${totalPagesRef.current}` : ""}
         </Text>
         <Button
           variant="outline"
