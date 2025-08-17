@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { VStack, Input, Button, Dialog, Field, Box } from "@chakra-ui/react";
+import { VStack, Input, Button, Dialog, Field } from "@chakra-ui/react";
 import { Colors } from "@/shared/constants/colors";
 
 type Props = {

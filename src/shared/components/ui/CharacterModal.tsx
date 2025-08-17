@@ -9,18 +9,20 @@ import {
   Center,
   Spinner,
 } from "@chakra-ui/react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { QUERY_CHARACTER } from "@/graphql/ricky-morty.gql";
 import { useEffect, useState } from "react";
 import { capitaliseFirstLetter } from "@/shared/utils/formatValue";
 import { Colors } from "@/shared/constants/colors";
 
-export function CharacterModal({
-  id,
-  open,
-  onClose,
-  fallback,
-}: {
+type Episode = {
+  id: string;
+  episode: string;
+  name: string;
+  air_date: string;
+};
+
+type CharacterModalProps = {
   id: string | null;
   open: boolean;
   onClose: () => void;
@@ -32,7 +34,14 @@ export function CharacterModal({
     species: string;
     gender: string;
   }>;
-}) {
+};
+
+export const CharacterModal: React.FC<CharacterModalProps> = ({
+  id,
+  open,
+  onClose,
+  fallback,
+}) => {
   const { data, loading, error } = useQuery(QUERY_CHARACTER, {
     variables: { id: id! },
     skip: !open || !id,
@@ -132,11 +141,13 @@ export function CharacterModal({
                           Episodes({character.episode.length}):
                         </Text>
                         <Box as="ul" pl={4} m={0} textAlign="left">
-                          {character.episode.slice(0, epLimit).map((e: any) => (
-                            <Box as="li" key={e.id} listStyleType="disc">
-                              {e.episode} — {e.name} ({e.air_date})
-                            </Box>
-                          ))}
+                          {character.episode
+                            .slice(0, epLimit)
+                            .map((e: Episode) => (
+                              <Box as="li" key={e.id} listStyleType="disc">
+                                {e.episode} — {e.name} ({e.air_date})
+                              </Box>
+                            ))}
                         </Box>
                         {epLimit < character.episode.length && (
                           <Box display="flex" justifyContent="center" pt={4}>
@@ -161,4 +172,4 @@ export function CharacterModal({
       </Dialog.Positioner>
     </Dialog.Root>
   );
-}
+};
