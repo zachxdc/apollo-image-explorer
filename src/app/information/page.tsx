@@ -72,7 +72,6 @@ const InformationPage = () => {
   }, [page]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
   if (!ready) return null;
 
@@ -86,7 +85,7 @@ const InformationPage = () => {
           Failed to load: {String(error.message ?? error)}
         </Box>
       )}
-      <Box position="relative" ref={listRef}>
+      <Box position="relative">
         {loading && (
           <Center py={400}>
             <Spinner size="lg" color={Colors.textSecondary} />
