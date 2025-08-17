@@ -1,7 +1,6 @@
 # Apollo Image Explorer (Challenge Brief v3.5)
 Apollo Image Explorer is a web application built with Next.js, Chakra UI, and Apollo Client.
 It allows users to explore characters from the Rick and Morty universe with images, metadata, and episode details in a clean, responsive interface.
-👉 Try it live: [apollo-image-explorer.vercel.app/information](https://apollo-image-explorer.vercel.app/information)
 
 ## TL;DR
 Rick & Morty character explorer built with Next.js + Chakra UI + Apollo Client.  
@@ -9,7 +8,7 @@ Rick & Morty character explorer built with Next.js + Chakra UI + Apollo Client.
 - 📄 Paginated character list with images and data.  
 - 🪟 Character modal shows details + episodes.  
 - 📱 Responsive: iPhone 4/5 usable, iPhone 6+ perfect.  
-- 🚀 Live demo: [apollo-image-explorer.vercel.app/information](https://apollo-image-explorer.vercel.app/information)
+- 🚀 [Live demo](https://apollo-image-explorer.vercel.app/information)
 
 ## Features
 1. **Documentation**: Clean, structured codebase, set up with git.
@@ -40,6 +39,7 @@ Rick & Morty character explorer built with Next.js + Chakra UI + Apollo Client.
     - Built only with the core tools required for the challenge.
 
 ## File Structure:
+```
 src
 ├─ app
 │  ├─ blocker/
@@ -70,6 +70,7 @@ src
 │  │  └─ colors.ts
 │  └─ utils/
 │     └─ formatValue.ts
+```
 
 ## Scripts
 ```bash
