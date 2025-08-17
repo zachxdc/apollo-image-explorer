@@ -87,7 +87,7 @@ const InformationPage = () => {
       )}
       <Box position="relative">
         {loading && (
-          <Center py={400}>
+          <Center py={500}>
             <Spinner size="lg" color={Colors.textSecondary} />
           </Center>
         )}
