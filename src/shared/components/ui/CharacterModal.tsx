@@ -96,7 +96,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       <Dialog.Positioner alignItems="center" justifyContent="center">
         <Dialog.Content p={4} w="full" maxW="380px" maxH="80vh">
           <Dialog.Header>
-            <Dialog.Title>{character?.name ?? "Details"}</Dialog.Title>
+            <Dialog.Title>{character?.name}</Dialog.Title>
             <Dialog.CloseTrigger
               as="button"
               position="absolute"
@@ -113,7 +113,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
             {error ? (
               <Text color={Colors.error}>Failed to load details.</Text>
             ) : loading || !character ? (
-              <Center py={10}>
+              <Center minH="20vh">
                 <Spinner size="lg" color={Colors.textSecondary} />
               </Center>
             ) : (
@@ -127,6 +127,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                       maxW="300px"
                       borderRadius="md"
                       mx="auto"
+                      loading="eager"
                     />
                   </Box>
                 )}

@@ -33,6 +33,7 @@ export const BlockerModal: React.FC<Props> = ({
 
   const isEditing = Boolean(defaultUsername || defaultJobTitle);
   const canSubmit = username.trim().length > 0 && jobTitle.trim().length > 0;
+
   const submit = () => {
     if (!onSubmit || !canSubmit) return;
     onSubmit(username, jobTitle);

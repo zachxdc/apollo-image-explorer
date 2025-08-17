@@ -1,5 +1,3 @@
-"use client";
-
 import { Colors } from "@/shared/constants/colors";
 import { Box, Text } from "@chakra-ui/react";
 

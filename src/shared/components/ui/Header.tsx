@@ -2,6 +2,7 @@
 
 import { Colors } from "@/shared/constants/colors";
 import { Box, HStack, Text, Button, Menu, Link } from "@chakra-ui/react";
+import { useCallback } from "react";
 
 type Props = {
   appName?: string;
@@ -16,10 +17,10 @@ export const Header: React.FC<Props> = ({
   jobTitle,
   onEditInfo,
 }) => {
-  const onSignOut = () => {
+  const onSignOut = useCallback(() => {
     localStorage.removeItem("ricky-morty-user");
     window.location.reload();
-  };
+  }, []);
 
   return (
     <Box as="header" px={4} py={3} borderBottomWidth="1px">
