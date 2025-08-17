@@ -1,18 +1,14 @@
-import { BlockerLayout } from "@/components/layout/BlockerLayout";
-import { Provider } from "@/components/ui/provider";
+import { BlockerLayout } from "@/shared/components/layout/BlockerLayout";
+import { Provider } from "@/shared/components/ui/provider";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <Provider>
-          <BlockerLayout>{children}</BlockerLayout>
-        </Provider>
-      </body>
-    </html>
-  );
-}
+const RootLayout = ({ children }: { children: React.ReactNode }) => (
+  <html lang="en" suppressHydrationWarning>
+    <body suppressHydrationWarning>
+      <Provider>
+        <BlockerLayout>{children}</BlockerLayout>
+      </Provider>
+    </body>
+  </html>
+);
+
+export default RootLayout;

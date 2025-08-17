@@ -1,6 +1,6 @@
 "use client";
 
-import { apolloClient } from "@/configs/apollo-client";
+import { apolloClient } from "@/graphql/apollo-client";
 import { UserProfileProvider } from "@/contexts/user-profile";
 import { ApolloProvider } from "@apollo/client";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";

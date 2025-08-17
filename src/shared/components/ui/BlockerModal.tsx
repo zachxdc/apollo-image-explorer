@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { VStack, Input, Button, Text, Dialog } from "@chakra-ui/react";
+import { Colors } from "@/shared/constants/colors";
 
 type Props = {
   open?: boolean;
@@ -41,11 +42,10 @@ export const BlockerModal: React.FC<Props> = ({
         if (!e.open) onClose?.();
       }}
     >
-      <Dialog.Backdrop bg="blackAlpha.600" />
+      <Dialog.Backdrop bg={Colors.overlayBg} />
       <Dialog.Positioner alignItems="center">
         <Dialog.Content
           bg="white"
-          color="black"
           w="full"
           maxW="sm"
           borderRadius="md"
@@ -63,7 +63,7 @@ export const BlockerModal: React.FC<Props> = ({
           <Dialog.Body>
             <VStack alignItems="stretch" gap={3}>
               <Text fontSize="sm" textAlign="center">
-                Enter your username & job title to continue.
+                Enter your username and job title to continue
               </Text>
               <Input
                 placeholder="Username"

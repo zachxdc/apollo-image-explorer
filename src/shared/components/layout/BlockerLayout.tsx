@@ -5,6 +5,7 @@ import { Box, HStack, Button, Text } from "@chakra-ui/react";
 import { Footer } from "../ui/Footer";
 import { BlockerModal } from "../ui/BlockerModal";
 import { useUserProfile } from "@/contexts/user-profile";
+import { Colors } from "@/shared/constants/colors";
 
 export const BlockerLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -16,26 +17,20 @@ export const BlockerLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <Box minH="100dvh" display="flex" flexDir="column">
-      <Box
-        as="header"
-        px={4}
-        py={3}
-        borderBottomWidth="1px"
-        borderColor="gray.200"
-      >
+      <Box as="header" px={4} py={3} borderBottomWidth="1px">
         <HStack justify="space-between">
-          <Text fontWeight="semibold">Apollo Image Explorer</Text>
+          <Text fontWeight="bold">Apollo Image Explorer</Text>
           {profile && (
             <HStack>
-              <Text fontSize="sm" color="gray.600">
-                Username: {profile?.username} | Job Title: {profile?.jobTitle}{" "}
+              <Text fontSize="sm" color={Colors.textSecondary}>
+                {profile?.username} | {profile?.jobTitle}{" "}
               </Text>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => setEditOpen(true)}
               >
-                Edit Profile
+                Edit Info
               </Button>
             </HStack>
           )}

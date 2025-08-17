@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client";
 import {
@@ -11,11 +11,13 @@ import {
   Image,
   Button,
   HStack,
-  Dialog,
-  VStack,
+  AspectRatio,
 } from "@chakra-ui/react";
 import { useRequireProfile } from "@/hooks/use-require-profile";
-import { QUERY_CHARACTERS } from "@/configs/ricky-morty.gql";
+import { QUERY_CHARACTERS } from "@/graphql/ricky-morty.gql";
+import { CharacterModal } from "@/shared/components/ui/CharacterModal";
+import { capitaliseFirstLetter } from "@/shared/utils/formatValue";
+import { Colors } from "@/shared/constants/colors";
 
 type Character = {
   id: string;
@@ -44,56 +46,64 @@ const InformationPage = () => {
 
   const { data, loading, error } = useQuery<CharactersResp>(QUERY_CHARACTERS, {
     variables: { page },
-    skip: !profile,
+    skip: !ready || !profile,
     fetchPolicy: "cache-first",
   });
 
+  useEffect(() => {
+    const total = data?.characters?.info?.pages;
+    if (total && page > total) {
+      router.replace(`/information?page=${total}`);
+    }
+  }, [data, page, router]);
+
   const [activeId, setActiveId] = useState<string | null>(null);
-  const active = useMemo(() => {
-    const list = data?.characters?.results ?? [];
-    return list.find((x) => x.id === activeId) ?? null;
-  }, [data, activeId]);
 
   if (!ready) return null;
 
-  const gotoPage = (p: number) => router.replace(`/information?page=${p}`);
-
   return (
-    <Box px={6} py={8}>
+    <Box px={6} py={8} maxW="1600px" mx="auto">
       <HStack justify="space-between" mb={2}>
         <Heading size="lg">Information</Heading>
       </HStack>
       {error && (
-        <Box color="red.600" mb={4}>
+        <Box color={Colors.error} mb={4}>
           Failed to load: {String(error.message ?? error)}
         </Box>
       )}
       <SimpleGrid
+        justifyItems="center"
         columns={{ base: 2, md: 4, lg: 5 }}
         gap={4}
         aria-busy={loading ? "true" : "false"}
       >
-        {(data?.characters?.results ?? []).map((ch) => (
+        {(data?.characters?.results ?? []).map((character) => (
           <Box
-            key={ch.id}
-            borderWidth="1px"
+            as="article"
+            key={character.id}
+            w="full"
+            maxW="300px"
             borderRadius="md"
+            borderWidth="1px"
             overflow="hidden"
             _hover={{ boxShadow: "md", cursor: "pointer" }}
-            onClick={() => setActiveId(ch.id)}
+            display="flex"
+            flexDir="column"
+            onClick={() => setActiveId(character.id)}
           >
-            <Image
-              src={ch.image}
-              alt={ch.name}
-              objectFit="cover"
-              loading="lazy"
-            />
-            <Box p={2}>
-              <Text fontWeight="semibold" title={ch.name}>
-                {ch.name}
+            <AspectRatio ratio={1}>
+              <Image
+                src={character.image}
+                alt={character.name}
+                objectFit="cover"
+              />
+            </AspectRatio>
+            <Box p={4}>
+              <Text fontWeight="bold" title={character.name}>
+                {character.name}
               </Text>
-              <Text fontSize="sm" color="gray.600">
-                {ch.species} · {ch.gender}
+              <Text fontSize="sm" color={Colors.textSecondary}>
+                Status: {capitaliseFirstLetter(character.status)}
               </Text>
             </Box>
           </Box>
@@ -103,11 +113,15 @@ const InformationPage = () => {
         <Button
           variant="outline"
           onClick={() =>
-            gotoPage(
-              Math.max(1, (data?.characters?.info?.prev ?? page - 1) || 1)
+            router.replace(
+              `/information?page=${Math.max(
+                1,
+                (data?.characters?.info?.prev ?? page - 1) || 1
+              )}`,
+              { scroll: false }
             )
           }
-          disabled={!data?.characters?.info?.prev}
+          disabled={!data?.characters?.info?.prev || loading}
         >
           Prev
         </Button>
@@ -116,49 +130,23 @@ const InformationPage = () => {
         </Text>
         <Button
           variant="outline"
-          onClick={() => gotoPage(data?.characters?.info?.next ?? page + 1)}
-          disabled={!data?.characters?.info?.next}
+          onClick={() =>
+            router.replace(
+              `/information?page=${data?.characters?.info?.next ?? page + 1}`,
+              { scroll: false }
+            )
+          }
+          disabled={!data?.characters?.info?.next || loading}
         >
           Next
         </Button>
       </HStack>
 
-      <Dialog.Root
-        open={!!active}
-        onOpenChange={(e) => {
-          if (!e.open) setActiveId(null);
-        }}
-      >
-        <Dialog.Backdrop bg="blackAlpha.750" />
-        <Dialog.Positioner alignItems="center" justifyContent="center">
-          <Dialog.Content p={4}>
-            <Dialog.Header display="flex" justifyContent="center">
-              <Dialog.Title>{active?.name ?? "Details"}</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              {active ? (
-                <VStack align="center" gap={4}>
-                  <Image
-                    src={active.image}
-                    alt={active.name}
-                    objectFit="contain"
-                    borderRadius="md"
-                  />
-                  <Box textAlign="center">
-                    <Text>Status: {active.status}</Text>
-                    <Text>Species: {active.species}</Text>
-                    <Text>Gender: {active.gender}</Text>
-                  </Box>
-                </VStack>
-              ) : (
-                <Text fontSize="sm" color="gray.600">
-                  Loading…
-                </Text>
-              )}
-            </Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+      <CharacterModal
+        id={activeId}
+        open={!!activeId}
+        onClose={() => setActiveId(null)}
+      />
     </Box>
   );
 };
