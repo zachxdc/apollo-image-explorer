@@ -9,7 +9,6 @@ import {
   Text,
   SimpleGrid,
   Image,
-  Button,
   HStack,
   AspectRatio,
   Center,
