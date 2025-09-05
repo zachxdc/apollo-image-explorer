@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { VStack, Input, Button, Dialog, Field } from "@chakra-ui/react";
 import { Colors } from "@/shared/constants/colors";
 
@@ -23,6 +23,7 @@ export const BlockerModal: React.FC<Props> = ({
   const [username, setUsername] = useState(defaultUsername);
   const [jobTitle, setJobTitle] = useState(defaultJobTitle);
 
+  // keep state in sync with default values
   useEffect(() => {
     setUsername(defaultUsername);
     setJobTitle(defaultJobTitle);
@@ -34,19 +35,32 @@ export const BlockerModal: React.FC<Props> = ({
   const isEditing = Boolean(defaultUsername || defaultJobTitle);
   const canSubmit = username.trim().length > 0 && jobTitle.trim().length > 0;
 
-  const submit = () => {
+  // stable handlers
+  const handleUsernameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value),
+    []
+  );
+
+  const handleJobTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setJobTitle(e.target.value),
+    []
+  );
+
+  const handleOpenChange = useCallback(
+    (e: { open: boolean }) => {
+      if (!e.open) onClose?.();
+    },
+    [onClose]
+  );
+
+  const handleSubmit = useCallback(() => {
     if (!onSubmit || !canSubmit) return;
     onSubmit(username, jobTitle);
     onClose?.();
-  };
+  }, [onSubmit, onClose, username, jobTitle, canSubmit]);
 
   return (
-    <Dialog.Root
-      open={!!open}
-      onOpenChange={(e) => {
-        if (!e.open) onClose?.();
-      }}
-    >
+    <Dialog.Root open={!!open} onOpenChange={handleOpenChange}>
       <Dialog.Backdrop bg={Colors.overlayBg} />
       <Dialog.Positioner alignItems="center">
         <Dialog.Content
@@ -67,7 +81,7 @@ export const BlockerModal: React.FC<Props> = ({
                 <Field.Label>Username*</Field.Label>
                 <Input
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={handleUsernameChange}
                   maxLength={MAX_USERNAME}
                 />
                 {username.length === MAX_USERNAME && (
@@ -80,7 +94,7 @@ export const BlockerModal: React.FC<Props> = ({
                 <Field.Label>Job Title*</Field.Label>
                 <Input
                   value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
+                  onChange={handleJobTitleChange}
                   maxLength={MAX_JOB_TITLE}
                 />
                 {jobTitle.length === MAX_JOB_TITLE && (
@@ -92,7 +106,7 @@ export const BlockerModal: React.FC<Props> = ({
             </VStack>
           </Dialog.Body>
           <Dialog.Footer gap={2}>
-            <Button onClick={submit} disabled={!canSubmit} mr={2}>
+            <Button onClick={handleSubmit} disabled={!canSubmit} mr={2}>
               {isEditing ? "Save" : "Continue"}
             </Button>
             {onClose && (

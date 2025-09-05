@@ -1,57 +1,96 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 
 export type UserProfile = { username: string; jobTitle: string } | null;
 
-type Ctx = {
+type UserProfileContextType = {
   profile: UserProfile;
   ready: boolean;
-  save: (username: string, jobTitle: string) => void;
-  reset: () => void;
+  updateProfile: (username: string, jobTitle: string) => void;
+  clearProfile: () => void;
 };
 
-const KEY = "ricky-morty-user";
-const C = createContext<Ctx | null>(null);
+const STORAGE_KEY = "ricky-morty-user";
+const UserProfileContext = createContext<UserProfileContextType | null>(null);
 
-export const UserProfileProvider = ({
+// Helper: safely load from localStorage
+const loadProfile = (): UserProfile => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
-}: {
-  children: React.ReactNode;
 }) => {
-  const [profile, setProfile] = useState<UserProfile>(null);
-  const [ready, setReady] = useState(false);
+  // Lazy init ensures localStorage is read only once on first render
+  const [profile, setProfile] = useState<UserProfile>(() => loadProfile());
+  const [ready] = useState(true); // since it's client-only, we can mark ready immediately
 
+  // Update profile and persist to localStorage
+  const updateProfile = (username: string, jobTitle: string) => {
+    const next = { username: username.trim(), jobTitle: jobTitle.trim() };
+    if (JSON.stringify(next) !== JSON.stringify(profile)) {
+      setProfile(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+    }
+  };
+
+  // Clear profile
+  const clearProfile = () => {
+    if (profile !== null) {
+      setProfile(null);
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {}
+    }
+  };
+
+  // Optional: sync across browser tabs
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setProfile(JSON.parse(raw));
-    } catch {}
-    setReady(true);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY) return;
+      try {
+        setProfile(e.newValue ? JSON.parse(e.newValue) : null);
+      } catch {
+        setProfile(null);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (profile) localStorage.setItem(KEY, JSON.stringify(profile));
-      else localStorage.removeItem(KEY);
-    } catch {}
-  }, [profile]);
-
-  const save = (username: string, jobTitle: string) =>
-    setProfile({ username: username.trim(), jobTitle: jobTitle.trim() });
-  const reset = () => setProfile(null);
+  // Memoize context value so children don't re-render unnecessarily
+  const value = useMemo(
+    () => ({ profile, ready, updateProfile, clearProfile }),
+    [profile, ready]
+  );
 
   return (
-    <C.Provider value={{ profile, ready, save, reset }}>{children}</C.Provider>
+    <UserProfileContext.Provider value={value}>
+      {children}
+    </UserProfileContext.Provider>
   );
 };
 
+// Hook to access profile
 export const useUserProfile = () => {
-  const ctx = useContext(C);
-  if (!ctx)
+  const context = useContext(UserProfileContext);
+  if (!context)
     throw new Error(
       "useUserProfile must be used within <UserProfileProvider />"
     );
-  return ctx;
+  return context;
 };

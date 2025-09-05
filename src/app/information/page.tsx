@@ -59,6 +59,7 @@ const InformationPage = () => {
 
   const totalPages = Number(data?.characters?.info?.pages) ?? null;
 
+  // 如果页数超出范围，跳到最后一页
   useEffect(() => {
     const total = data?.characters?.info?.pages;
     if (total && currentPage > total) {
@@ -66,12 +67,12 @@ const InformationPage = () => {
     }
   }, [data, currentPage, router]);
 
+  // 翻页时滚动到顶部
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
+  // 稳定化 handler
   const handlePageChange = useCallback(
     ({ page }: { page: number }) => {
       if (page !== currentPage) {
@@ -80,6 +81,14 @@ const InformationPage = () => {
     },
     [currentPage, router]
   );
+
+  const handleSelectCard = useCallback((id: string) => {
+    setActiveId(id);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setActiveId(null);
+  }, []);
 
   if (!ready || !profile) {
     return (
@@ -94,11 +103,13 @@ const InformationPage = () => {
       <HStack justify="space-between" mb={2}>
         <Heading size="lg">Information</Heading>
       </HStack>
+
       {error && (
         <Box color={Colors.error} mb={4}>
           Failed to load: {String(error.message ?? error)}
         </Box>
       )}
+
       <Box position="relative">
         {loading && (
           <Center minH="60vh">
@@ -121,10 +132,11 @@ const InformationPage = () => {
               borderRadius="md"
               borderWidth="1px"
               overflow="hidden"
-              _hover={{ boxShadow: "md", cursor: "pointer" }}
+              cursor="pointer"
+              _hover={{ boxShadow: "md" }}
               display="flex"
               flexDir="column"
-              onClick={() => setActiveId(character.id)}
+              onClick={() => handleSelectCard(character.id)}
             >
               <AspectRatio ratio={1}>
                 <Image
@@ -150,6 +162,7 @@ const InformationPage = () => {
           ))}
         </SimpleGrid>
       </Box>
+
       <HStack justify="center" gap={2} mt={8}>
         {!loading && (
           <Pagination.Root
@@ -161,14 +174,15 @@ const InformationPage = () => {
           >
             <ButtonGroup variant="outline" size="md">
               <Pagination.PrevTrigger asChild>
-                <IconButton>Prev</IconButton>
+                <IconButton aria-label="Previous page">Prev</IconButton>
               </Pagination.PrevTrigger>
               <Pagination.Context>
                 {({ pages }) =>
                   pages.map((page, index) =>
                     page.type === "page" ? (
-                      <Pagination.Item key={index} {...page} asChild>
+                      <Pagination.Item key={page.value} {...page} asChild>
                         <IconButton
+                          aria-label={`Go to page ${page.value}`}
                           variant={
                             page.value === currentPage ? "solid" : "outline"
                           }
@@ -188,16 +202,17 @@ const InformationPage = () => {
                 }
               </Pagination.Context>
               <Pagination.NextTrigger asChild>
-                <IconButton>Next</IconButton>
+                <IconButton aria-label="Next page">Next</IconButton>
               </Pagination.NextTrigger>
             </ButtonGroup>
           </Pagination.Root>
         )}
       </HStack>
+
       <CharacterModal
         id={activeId}
         open={!!activeId}
-        onClose={() => setActiveId(null)}
+        onClose={handleCloseModal}
       />
     </Box>
   );

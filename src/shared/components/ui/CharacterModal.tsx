@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Dialog,
   Image,
@@ -11,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@apollo/client";
 import { QUERY_CHARACTER } from "@/graphql/ricky-morty.gql";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { capitaliseFirstLetter } from "@/shared/utils/formatValue";
 import { Colors } from "@/shared/constants/colors";
 
@@ -36,6 +37,22 @@ type CharacterModalProps = {
   }>;
 };
 
+// Moved out to avoid re-creating every render
+const InfoItem: React.FC<{ label: string; value?: string | null }> = ({
+  label,
+  value,
+}) => {
+  if (!value || value.toLowerCase() === "unknown") return null;
+  return (
+    <Text>
+      <Text as="span" fontWeight="semibold">
+        {label}:{" "}
+      </Text>
+      {label === "Status" ? capitaliseFirstLetter(value) : value}
+    </Text>
+  );
+};
+
 export const CharacterModal: React.FC<CharacterModalProps> = ({
   id,
   open,
@@ -52,46 +69,41 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   const [epLimit, setEpLimit] = useState(5);
 
-  useEffect(() => {
-    setEpLimit(5);
-  }, [id]);
+  // Reset episode limit when id changes
+  useEffect(() => setEpLimit(5), [id]);
 
   const character = data?.character ?? (open ? fallback : null);
 
-  const fields: Array<[label: string, value?: string | null]> = [
-    ["Status", character?.status],
-    ["Species", character?.species],
-    ["Type", character?.type],
-    ["Gender", character?.gender],
-    ["Origin", character?.origin?.name],
-    ["Location", character?.location?.name],
-  ];
+  // Memoize fields to avoid re-allocating on each render
+  const fields = useMemo(
+    () =>
+      [
+        ["Status", character?.status],
+        ["Species", character?.species],
+        ["Type", character?.type],
+        ["Gender", character?.gender],
+        ["Origin", character?.origin?.name],
+        ["Location", character?.location?.name],
+      ] as Array<[string, string | null | undefined]>,
+    [character]
+  );
 
-  const isValidValue = (v?: string | null, field?: string) => {
-    if (field === "status") {
-      return !!v;
+  // stable handlers
+  const handleOpenChange = useCallback(
+    (e: { open: boolean }) => {
+      if (!e.open) onClose();
+    },
+    [onClose]
+  );
+
+  const handleViewMore = useCallback(() => {
+    if (character?.episode) {
+      setEpLimit((n) => Math.min(n + 10, character.episode.length));
     }
-    return !!v && v.toLowerCase() !== "unknown";
-  };
-
-  const InfoItem = ({
-    label,
-    value,
-  }: {
-    label: string;
-    value?: string | null;
-  }) =>
-    isValidValue(value, label.toLowerCase()) ? (
-      <Text>
-        <Text as="span" fontWeight="semibold">
-          {label}:{" "}
-        </Text>
-        {label === "Status" ? capitaliseFirstLetter(value) : value}{" "}
-      </Text>
-    ) : null;
+  }, [character?.episode]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={(e) => !e.open && onClose()}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Backdrop bg={Colors.overlayBg} />
       <Dialog.Positioner alignItems="center" justifyContent="center">
         <Dialog.Content p={4} w="full" maxW="380px" maxH="80vh">
@@ -121,13 +133,13 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                 {character.image && (
                   <Box textAlign="center">
                     <Image
-                      src={character.image!}
+                      src={character.image}
                       alt={character.name ?? ""}
                       objectFit="contain"
                       maxW="300px"
                       borderRadius="md"
                       mx="auto"
-                      loading="eager"
+                      loading="lazy" // better hydration + perf
                     />
                   </Box>
                 )}
@@ -139,7 +151,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                     character.episode.length > 0 && (
                       <Box>
                         <Text fontWeight="semibold" mb={1}>
-                          Episodes({character.episode.length}):
+                          Episodes ({character.episode.length}):
                         </Text>
                         <Box as="ul" pl={4} m={0} textAlign="left">
                           {character.episode
@@ -152,15 +164,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                         </Box>
                         {epLimit < character.episode.length && (
                           <Box display="flex" justifyContent="center" pt={4}>
-                            <Button
-                              onClick={() =>
-                                setEpLimit((n) =>
-                                  Math.min(n + 10, character.episode.length)
-                                )
-                              }
-                            >
-                              View more
-                            </Button>
+                            <Button onClick={handleViewMore}>View more</Button>
                           </Box>
                         )}
                       </Box>

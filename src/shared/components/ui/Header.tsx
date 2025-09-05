@@ -31,6 +31,9 @@ export const Header: React.FC<Props> = ({
         {username ? (
           <Menu.Root positioning={{ placement: "bottom-end", gutter: 8 }}>
             <Menu.Trigger asChild>
+              {/* TODO: Hydration failed because the server rendered HTML didn't
+              match the client. As a result this tree will be regenerated on the
+              client.  */}
               <Button variant="outline">
                 <Text>{username}</Text>
               </Button>

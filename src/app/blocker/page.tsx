@@ -8,18 +8,24 @@ import { useUserProfile } from "@/contexts/user-profile";
 const BlockerPage = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { profile, ready, save } = useUserProfile();
+  const { profile, ready, updateProfile } = useUserProfile();
 
   useEffect(() => {
     if (!ready) return;
+    // redirect only once when profile exists and not already on /information
     if (profile && pathname !== "/information") {
       router.replace("/information");
     }
-  }, [ready, profile, pathname, router]);
+  }, [ready, profile, pathname]); // router is stable, no need to include
 
-  if (!ready || profile) return null;
+  // not ready → show nothing
+  if (!ready) return null;
 
-  return <BlockerModal onSubmit={save} />;
+  // already have profile → redirect handled above, render nothing
+  if (profile) return null;
+
+  // no profile → force user to fill info
+  return <BlockerModal onSubmit={updateProfile} />;
 };
 
 export default BlockerPage;
