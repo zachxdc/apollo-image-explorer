@@ -10,7 +10,7 @@ export const Footer: React.FC = () => (
     textAlign="center"
   >
     <Text fontSize="sm">
-      © {new Date().getFullYear()} Leonardo Web Team Challenge v3.5
+      © {new Date().getFullYear()} Apollo Image Explorer v3.5
     </Text>
   </Box>
 );
