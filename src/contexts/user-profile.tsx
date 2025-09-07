@@ -22,29 +22,24 @@ const STORAGE_KEY = "ricky-morty-user";
 const UserProfileContext = createContext<Context | null>(null);
 
 /** Type guard to ensure parsed data matches the expected shape */
-function isUserProfile(value: unknown): value is Exclude<UserProfile, null> {
-  return (
-    !!value &&
-    typeof value === "object" &&
-    "username" in (value as any) &&
-    "jobTitle" in (value as any)
-  );
-}
+const isUserProfile = (value: unknown): value is Exclude<UserProfile, null> =>
+  !!value &&
+  typeof value === "object" &&
+  "username" in (value as any) &&
+  "jobTitle" in (value as any);
 
 /** Normalize incoming values (trim and coerce to string) */
-function normalize(username: unknown, jobTitle: unknown) {
-  return {
-    username: String(username ?? "").trim(),
-    jobTitle: String(jobTitle ?? "").trim(),
-  };
-}
+const normalize = (username: unknown, jobTitle: unknown) => ({
+  username: String(username ?? "").trim(),
+  jobTitle: String(jobTitle ?? "").trim(),
+});
 
 /** Shallow equality check for UserProfile values */
-function isSameProfile(a: UserProfile, b: UserProfile) {
+const isSameProfile = (a: UserProfile, b: UserProfile) => {
   if (a === b) return true;
   if (a === null || b === null) return false;
   return a.username === b.username && a.jobTitle === b.jobTitle;
-}
+};
 
 export const UserProfileProvider = ({
   children,
@@ -134,12 +129,7 @@ export const UserProfileProvider = ({
             })()
           : null;
 
-        setProfile((prev) => {
-          if (isSameProfile(prev, next)) return prev;
-          return next;
-        });
-
-        // Keep serialized cache in sync
+        setProfile((prev) => (isSameProfile(prev, next) ? prev : next));
         lastSerializedRef.current = e.newValue;
       } catch {
         setProfile((prev) => (prev === null ? prev : null));
@@ -174,7 +164,7 @@ export const UserProfileProvider = ({
   );
 };
 
-export const useUserProfile = () => {
+export const useUserProfile = (): Context => {
   const context = useContext(UserProfileContext);
   if (!context) {
     throw new Error(
