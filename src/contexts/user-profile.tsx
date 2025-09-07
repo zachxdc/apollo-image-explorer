@@ -14,7 +14,7 @@ export type UserProfile = { username: string; jobTitle: string } | null;
 type Context = {
   profile: UserProfile;
   ready: boolean;
-  save: (username: string, jobTitle: string) => void;
+  updateProfile: (username: string, jobTitle: string) => void;
   reset: () => void;
 };
 
@@ -141,8 +141,8 @@ export const UserProfileProvider = ({
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  // Public API: save/reset (no-ops if value effectively unchanged)
-  const save = useCallback((username: string, jobTitle: string) => {
+  // Public API: updateProfile/reset (no-ops if value effectively unchanged)
+  const updateProfile = useCallback((username: string, jobTitle: string) => {
     const next = normalize(username, jobTitle);
     setProfile((prev) => (isSameProfile(prev, next) ? prev : next));
   }, []);
@@ -153,8 +153,8 @@ export const UserProfileProvider = ({
 
   // Memoize context to avoid re-rendering the entire subtree unnecessarily
   const contextValue = useMemo<Context>(
-    () => ({ profile, ready, save, reset }),
-    [profile, ready, save, reset]
+    () => ({ profile, ready, updateProfile, reset }),
+    [profile, ready, updateProfile, reset]
   );
 
   return (

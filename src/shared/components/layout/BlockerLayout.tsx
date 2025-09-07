@@ -10,7 +10,7 @@ import { Header } from "../ui/Header";
 export const BlockerLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { profile, ready, updateProfile } = useUserProfile(); // save -> updateProfile
+  const { profile, ready, updateProfile } = useUserProfile();
   const [editOpen, setEditOpen] = useState(false);
 
   // stable handlers to avoid re-renders in children
