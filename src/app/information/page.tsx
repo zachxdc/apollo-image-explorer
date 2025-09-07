@@ -45,12 +45,16 @@ const InformationPage = () => {
   const search = useSearchParams();
   const router = useRouter();
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Control how many sibling pages are shown in pagination
   const siblingCount = useBreakpointValue({ base: 0, md: 1, lg: 2 });
 
+  // Read current page from query string (default to 1 if invalid)
   const pageFromUrl = Number(search.get("page") || "1");
   const currentPage =
     Number.isFinite(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
 
+  // Query characters with pagination
   const { data, loading, error } = useQuery<CharactersResp>(QUERY_CHARACTERS, {
     variables: { page: currentPage },
     skip: !ready || !profile,
@@ -59,7 +63,7 @@ const InformationPage = () => {
 
   const totalPages = Number(data?.characters?.info?.pages) ?? null;
 
-  // 如果页数超出范围，跳到最后一页
+  // If page number exceeds the total, redirect to the last page
   useEffect(() => {
     const total = data?.characters?.info?.pages;
     if (total && currentPage > total) {
@@ -67,12 +71,12 @@ const InformationPage = () => {
     }
   }, [data, currentPage, router]);
 
-  // 翻页时滚动到顶部
+  // Scroll to top on page change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
-  // 稳定化 handler
+  // Stable page change handler
   const handlePageChange = useCallback(
     ({ page }: { page: number }) => {
       if (page !== currentPage) {
@@ -90,6 +94,7 @@ const InformationPage = () => {
     setActiveId(null);
   }, []);
 
+  // Show loading spinner until profile is ready
   if (!ready || !profile) {
     return (
       <Center minH="60vh">
