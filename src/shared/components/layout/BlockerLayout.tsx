@@ -7,13 +7,13 @@ import { BlockerModal } from "../ui/BlockerModal";
 import { useUserProfile } from "@/contexts/user-profile";
 import { Header } from "../ui/Header";
 
+// This remains a client component because it needs useUserProfile context
 export const BlockerLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { profile, ready, updateProfile } = useUserProfile();
   const [editOpen, setEditOpen] = useState(false);
 
-  // stable handlers to avoid re-renders in children
   const openEdit = useCallback(() => setEditOpen(true), []);
   const closeEdit = useCallback(() => setEditOpen(false), []);
   const submitEdit = useCallback(

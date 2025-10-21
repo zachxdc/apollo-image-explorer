@@ -5,7 +5,7 @@ import { UserProfileProvider } from "@/contexts/user-profile";
 import { ApolloProvider } from "@apollo/client";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 
-export const Provider: React.FC<{ children: React.ReactNode }> = ({
+export const ClientProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => (
   <ChakraProvider value={defaultSystem}>

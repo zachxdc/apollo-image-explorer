@@ -1,27 +1,10 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@apollo/client";
-import {
-  Box,
-  Heading,
-  Text,
-  SimpleGrid,
-  Image,
-  HStack,
-  AspectRatio,
-  Center,
-  Spinner,
-  ButtonGroup,
-  IconButton,
-  Pagination,
-  useBreakpointValue,
-} from "@chakra-ui/react";
-import { useRequireProfile } from "@/hooks/use-require-profile";
-import { QUERY_CHARACTERS } from "@/graphql/ricky-morty.gql";
-import { CharacterModal } from "@/shared/components/ui/CharacterModal";
-import { capitaliseFirstLetter } from "@/shared/utils/formatValue";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { Box, Heading, HStack, SimpleGrid } from "@chakra-ui/react";
+import { fetchGraphQL, QUERY_CHARACTERS } from "@/graphql/server-fetch";
+import { CharacterCard } from "@/shared/components/ui/CharacterCard";
+import { PaginationControls } from "@/shared/components/ui/PaginationControls";
+import { CharacterModalWrapper } from "@/shared/components/ui/CharacterModalWrapper";
 import { Colors } from "@/shared/constants/colors";
 
 type Character = {
@@ -33,74 +16,53 @@ type Character = {
   gender: string;
 };
 
-type CharactersResp = {
+type CharactersData = {
   characters: {
     info: { pages: number; next: number | null; prev: number | null };
     results: Character[];
   };
 };
 
-const InformationPage = () => {
-  const { profile, ready } = useRequireProfile("/blocker");
-  const search = useSearchParams();
-  const router = useRouter();
-  const [activeId, setActiveId] = useState<string | null>(null);
+type PageProps = {
+  searchParams: Promise<{ page?: string }>;
+};
 
-  // Control how many sibling pages are shown in pagination
-  const siblingCount = useBreakpointValue({ base: 0, md: 1, lg: 2 });
+export async function generateMetadata({
+  searchParams,
+}: PageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
 
-  // Read current page from query string (default to 1 if invalid)
-  const pageFromUrl = Number(search.get("page") || "1");
+  return {
+    title: page === 1 ? "Information" : `Information - Page ${page}`,
+    description: `Browse Rick and Morty characters - Page ${page}`,
+  };
+}
+
+async function InformationPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const pageFromUrl = Number(params.page || "1");
   const currentPage =
     Number.isFinite(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
 
-  // Query characters with pagination
-  const { data, loading, error } = useQuery<CharactersResp>(QUERY_CHARACTERS, {
-    variables: { page: currentPage },
-    skip: !ready || !profile,
-    fetchPolicy: "cache-first",
-  });
+  // Fetch data on the server
+  let data: CharactersData | null = null;
+  let error: string | null = null;
 
-  const totalPages = Number(data?.characters?.info?.pages) ?? null;
+  try {
+    data = await fetchGraphQL<CharactersData>(QUERY_CHARACTERS, {
+      page: currentPage,
+    });
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Failed to load characters";
+  }
 
-  // If page number exceeds the total, redirect to the last page
-  useEffect(() => {
-    const total = data?.characters?.info?.pages;
-    if (total && currentPage > total) {
-      router.replace(`/information?page=${total}`);
-    }
-  }, [data, currentPage, router]);
+  const totalPages = data?.characters?.info?.pages ?? 0;
+  const characters = data?.characters?.results ?? [];
 
-  // Scroll to top on page change
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
-
-  // Stable page change handler
-  const handlePageChange = useCallback(
-    ({ page }: { page: number }) => {
-      if (page !== currentPage) {
-        router.replace(`/information?page=${page}`, { scroll: false });
-      }
-    },
-    [currentPage, router]
-  );
-
-  const handleSelectCard = useCallback((id: string) => {
-    setActiveId(id);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setActiveId(null);
-  }, []);
-
-  // Show loading spinner until profile is ready
-  if (!ready || !profile) {
-    return (
-      <Center minH="60vh">
-        <Spinner size="lg" color={Colors.textSecondary} />
-      </Center>
-    );
+  // If page number exceeds total, redirect to last page
+  if (totalPages > 0 && currentPage > totalPages) {
+    redirect(`/information?page=${totalPages}`);
   }
 
   return (
@@ -111,116 +73,27 @@ const InformationPage = () => {
 
       {error && (
         <Box color={Colors.error} mb={4}>
-          Failed to load: {String(error.message ?? error)}
+          Failed to load: {error}
         </Box>
       )}
 
-      <Box position="relative">
-        {loading && (
-          <Center minH="60vh">
-            <Spinner size="lg" color={Colors.textSecondary} />
-          </Center>
-        )}
-        <SimpleGrid
-          justifyItems="center"
-          columns={{ base: 2, md: 4, lg: 5 }}
-          gap={4}
-          aria-busy={loading ? "true" : "false"}
-          pointerEvents={loading ? "none" : "auto"}
-        >
-          {(data?.characters?.results ?? []).map((character) => (
-            <Box
-              as="article"
-              key={character.id}
-              w="full"
-              maxW="300px"
-              borderRadius="md"
-              borderWidth="1px"
-              overflow="hidden"
-              cursor="pointer"
-              _hover={{ boxShadow: "md" }}
-              display="flex"
-              flexDir="column"
-              onClick={() => handleSelectCard(character.id)}
-            >
-              <AspectRatio ratio={1}>
-                <Image
-                  src={character.image}
-                  alt={character.name}
-                  objectFit="cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </AspectRatio>
-              <Box p={4}>
-                <Text fontWeight="bold" title={character.name}>
-                  {character.name}
-                </Text>
-                <Text fontSize="sm" color={Colors.textSecondary}>
-                  Status: {capitaliseFirstLetter(character.status)}
-                </Text>
-                <Text fontSize="sm" color={Colors.textSecondary}>
-                  Species: {capitaliseFirstLetter(character.species)}
-                </Text>
-              </Box>
-            </Box>
-          ))}
-        </SimpleGrid>
-      </Box>
+      <SimpleGrid
+        justifyItems="center"
+        columns={{ base: 2, md: 4, lg: 5 }}
+        gap={4}
+      >
+        {characters.map((character) => (
+          <CharacterCard key={character.id} character={character} />
+        ))}
+      </SimpleGrid>
 
-      <HStack justify="center" gap={2} mt={8}>
-        {!loading && (
-          <Pagination.Root
-            count={totalPages}
-            page={currentPage}
-            pageSize={1}
-            onPageChange={handlePageChange}
-            siblingCount={siblingCount}
-          >
-            <ButtonGroup variant="outline" size="md">
-              <Pagination.PrevTrigger asChild>
-                <IconButton aria-label="Previous page">Prev</IconButton>
-              </Pagination.PrevTrigger>
-              <Pagination.Context>
-                {({ pages }) =>
-                  pages.map((page, index) =>
-                    page.type === "page" ? (
-                      <Pagination.Item key={page.value} {...page} asChild>
-                        <IconButton
-                          aria-label={`Go to page ${page.value}`}
-                          variant={
-                            page.value === currentPage ? "solid" : "outline"
-                          }
-                        >
-                          {page.value}
-                        </IconButton>
-                      </Pagination.Item>
-                    ) : (
-                      <Pagination.Ellipsis
-                        key={`ellipsis-${index}`}
-                        index={index}
-                      >
-                        &#8230;
-                      </Pagination.Ellipsis>
-                    )
-                  )
-                }
-              </Pagination.Context>
-              <Pagination.NextTrigger asChild>
-                <IconButton aria-label="Next page">Next</IconButton>
-              </Pagination.NextTrigger>
-            </ButtonGroup>
-          </Pagination.Root>
-        )}
-      </HStack>
+      {totalPages > 0 && (
+        <PaginationControls currentPage={currentPage} totalPages={totalPages} />
+      )}
 
-      <CharacterModal
-        id={activeId}
-        open={!!activeId}
-        onClose={handleCloseModal}
-      />
+      <CharacterModalWrapper />
     </Box>
   );
-};
+}
 
 export default InformationPage;

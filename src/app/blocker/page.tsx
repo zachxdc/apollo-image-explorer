@@ -16,7 +16,7 @@ const BlockerPage = () => {
     if (profile && pathname !== "/information") {
       router.replace("/information");
     }
-  }, [ready, profile, pathname]); // router is stable, no need to include
+  }, [ready, profile, pathname]); // router is stable in Next.js 15, intentionally excluded
 
   // not ready → show nothing
   if (!ready) return null;

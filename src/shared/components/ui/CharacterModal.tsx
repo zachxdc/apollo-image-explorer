@@ -2,7 +2,6 @@
 
 import {
   Dialog,
-  Image,
   Text,
   Box,
   VStack,
@@ -10,6 +9,7 @@ import {
   Center,
   Spinner,
 } from "@chakra-ui/react";
+import Image from "next/image";
 import { useQuery } from "@apollo/client";
 import { QUERY_CHARACTER } from "@/graphql/ricky-morty.gql";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -131,15 +131,13 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
             ) : (
               <VStack gap={4} align="stretch">
                 {character.image && (
-                  <Box textAlign="center">
+                  <Box textAlign="center" position="relative" height="300px">
                     <Image
                       src={character.image}
                       alt={character.name ?? ""}
-                      objectFit="contain"
-                      maxW="300px"
-                      borderRadius="md"
-                      mx="auto"
-                      loading="lazy" // better hydration + perf
+                      fill
+                      style={{ objectFit: "contain" }}
+                      sizes="380px"
                     />
                   </Box>
                 )}

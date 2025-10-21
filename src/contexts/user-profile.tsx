@@ -25,8 +25,8 @@ const UserProfileContext = createContext<Context | null>(null);
 const isUserProfile = (value: unknown): value is Exclude<UserProfile, null> =>
   !!value &&
   typeof value === "object" &&
-  "username" in (value as any) &&
-  "jobTitle" in (value as any);
+  "username" in value &&
+  "jobTitle" in value;
 
 /** Normalize incoming values (trim and coerce to string) */
 const normalize = (username: unknown, jobTitle: unknown) => ({
