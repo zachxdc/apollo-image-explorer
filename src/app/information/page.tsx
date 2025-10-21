@@ -13,7 +13,6 @@ type Character = {
   status: string;
   image: string;
   species: string;
-  gender: string;
 };
 
 type CharactersData = {

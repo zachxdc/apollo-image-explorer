@@ -10,7 +10,6 @@ type Props = {
   onSubmit?: (u: string, j: string) => void;
   defaultUsername?: string;
   defaultJobTitle?: string;
-  contentMaxW?: string | number;
 };
 
 export const BlockerModal: React.FC<Props> = ({

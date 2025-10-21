@@ -27,14 +27,6 @@ type CharacterModalProps = {
   id: string | null;
   open: boolean;
   onClose: () => void;
-  fallback?: Partial<{
-    id: string;
-    name: string;
-    image: string;
-    status: string;
-    species: string;
-    gender: string;
-  }>;
 };
 
 // Moved out to avoid re-creating every render
@@ -57,7 +49,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   id,
   open,
   onClose,
-  fallback,
 }) => {
   const { data, loading, error } = useQuery(QUERY_CHARACTER, {
     variables: { id: id! },
@@ -72,7 +63,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   // Reset episode limit when id changes
   useEffect(() => setEpLimit(5), [id]);
 
-  const character = data?.character ?? (open ? fallback : null);
+  const character = data?.character;
 
   // Memoize fields to avoid re-allocating on each render
   const fields = useMemo(

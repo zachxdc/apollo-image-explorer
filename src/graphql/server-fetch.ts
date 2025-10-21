@@ -3,7 +3,7 @@
  * Leverages Next.js 15 caching capabilities
  */
 
-const GRAPHQL_ENDPOINT = "https://rickandmortyapi.com/graphql";
+import { GRAPHQL_ENDPOINT } from "./config";
 
 type GraphQLResponse<T = unknown> = {
   data?: T;

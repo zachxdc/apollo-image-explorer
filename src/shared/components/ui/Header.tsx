@@ -66,13 +66,13 @@ export const Header: React.FC<Props> = ({
         <Link href="/" fontWeight="bold" textDecoration="none">
           {appName}
         </Link>
-        {username ? (
+        {username && (
           <UserMenu
             username={username}
             jobTitle={jobTitle}
             onEditInfo={onEditInfo}
           />
-        ) : null}
+        )}
       </HStack>
     </Box>
   );
